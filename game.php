@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, minimum-scale=0.75">
     <link rel="stylesheet" href="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.css">
     <script>
+        // This function will stop the URL change when navigating between pages on mobile devices 
         $(document).on("mobileinit", function () {
           $.mobile.hashListeningEnabled = false;
           $.mobile.pushStateEnabled = false;
@@ -59,17 +60,27 @@ img {
 
 <?php
 $php_name = $_SERVER['SCRIPT_NAME'];
+# read <file, title, count> lines, where file is the relative file name, and title is the title of the dish, count is a proxy of the popularity of the dish
 $file_names = file_get_contents("/var/www/file_title_count.list");
 $lines_arr = preg_split('/\n|\r/',$file_names);
-$num_newlines = count($lines_arr);
-$page_n = 12;
-$file_list = "";
-$count_list = "";
+$num_newlines = count($lines_arr); # total number of dishes in the database 
+$page_n = 12; # number of dishes in the test
+$file_list = ""; # keep a record of file names used in the game, will be passed to compare.php
+$count_list = ""; # keep a record of count for the dishes used in the game, will be passed to compare.php
 
-$index_arr = array_fill(0,$page_n,-1);
-$min_index = 0;
+
+/*
+  To avoid get the same record, we walk through records, keep a min_index and max_index pointers, then randomly get an index between them. The min_index starts with 0. The (max_index-min_index) will be determined by how many records left in the database, and how many records still need to pick
+*/
+$index_arr = array_fill(0,$page_n,-1); # keep track of the index of records used to make up the game
+$min_index = 0; 
 for( $i=1; $i<= $page_n; $i++ )
 {
+
+  /*
+    Number of records left in the database: $num_newlines - $min_index
+    Number of records still need to pick: ($page_n - $i+1)
+  */
   $max_index = ($num_newlines - $min_index)/($page_n - $i+1) + $min_index;  
   if ($max_index >= $num_newlines) 
   {
@@ -109,19 +120,28 @@ for( $i=1; $i<= $page_n; $i++ )
               </div>
               </div>
               <script type="text/javascript">
+// TO-do: combine the common code in the following two functions
+// response is to keep track user's answers
+
                  var response = new String();
                  $("#check_yes_<?=$i?>").bind('change', function (e) {
 
                     response = response + "1";
                     response = response + ",";
+// go to next page if there are more pages 
                     <?php if ($i<$page_n): ?> 
                         window.location.href = "#page<?=$i+1?>";
+// last page, need to call compare.php and pass all the data about this test
                     <?php else: ?>
+// response should already has all the answers
                         response = response + ";";
+// add the count of each dish
                         response = response + "<?php echo $count_list; ?>"+";";
+// add the file names
                         response = response + "<?php echo $file_list; ?>";
                         response = "answer=" + response;
 
+// make ajax call to compare.php
                         var ajax =new XMLHttpRequest(); 
                         ajax.open("GET",encodeURI("compare.php?"+response),true);
 //                        ajax.setRequestHeader("Content-type","application/x-www-form-urlencoded");
@@ -130,8 +150,9 @@ for( $i=1; $i<= $page_n; $i++ )
                         ajax.onreadystatechange=function()
                         {                     
                            if (ajax.status == 200 && ajax.readyState ==4) {
-document.getElementById("result").innerHTML = ajax.responseText;
-window.location.href = "#result";
+// all the response is received now, so populate "result" section in the result page, and navigate to result page
+                                document.getElementById("result").innerHTML = ajax.responseText;
+                                window.location.href = "#result";
 //                              window.location.href = "compare.php";
 //                              document.write(ajax.responseText);
                            }
