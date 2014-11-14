@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, minimum-scale=0.75">
     <link rel="stylesheet" href="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.css">
     <script>
-        // This function will stop the URL change when navigating between pages on mobile devices 
+        // This function will stop the URL change when navigating between pages on mobile devices.
         $(document).on("mobileinit", function () {
           $.mobile.hashListeningEnabled = false;
           $.mobile.pushStateEnabled = false;
@@ -22,7 +22,6 @@
 .ui-block-rating {
       width:75%;
 }
-
 .main_img {
       text-align: center;
       margin: 0 auto 
@@ -33,17 +32,14 @@
 .rateit {
       text-align: center;
 }
-
 .ui-checkobx {
    text-align: center;
    width: 40%;
 }
-
 img {
   max-height: 80%;
   max-width: 95%;
 }
-
 </style>
 
 <script type="text/javascript">
@@ -59,24 +55,29 @@ img {
 <body>
 
 <?php
-$php_name = $_SERVER['SCRIPT_NAME'];
-# read <file, title, count> lines, where file is the relative file name, and title is the title of the dish, count is a proxy of the popularity of the dish
-$file_names = file_get_contents("/var/www/file_title_count.list");
-$lines_arr = preg_split('/\n|\r/',$file_names);
-$num_newlines = count($lines_arr); # total number of dishes in the database 
-$page_n = 12; # number of dishes in the test
-$file_list = ""; # keep a record of file names used in the game, will be passed to compare.php
-$count_list = ""; # keep a record of count for the dishes used in the game, will be passed to compare.php
 
+$php_name = $_SERVER['SCRIPT_NAME'];
+
+# read <file, title, count> lines, where file is the relative file name,
+# and title is the title of the dish, count is an approximate of the
+# popularity of the dish.
+$file_names = file_get_contents("/var/www/file_title_count.list");
+$lines_arr = preg_split('/\n|\r/', $file_names);
+$num_newlines = count($lines_arr);  # total number of dishes in the database 
+$page_n = 12;  # number of dishes in the test
+$file_list = "";  # keep a record of file names used in the game, will be passed to compare.php
+$count_list = "";  # keep a record of count for the dishes used in the game, will be passed to compare.php
 
 /*
-  To avoid get the same record, we walk through records, keep a min_index and max_index pointers, then randomly get an index between them. The min_index starts with 0. The (max_index-min_index) will be determined by how many records left in the database, and how many records still need to pick
+  To avoid get the same record, we walk through records, keep a min_index and
+  max_index pointers, then randomly get an index between them. The min_index
+  starts with 0. The (max_index-min_index) will be determined by how many
+  records left in the database, and how many records still need to pick.
 */
-$index_arr = array_fill(0,$page_n,-1); # keep track of the index of records used to make up the game
+$index_arr = array_fill(0, $page_n, -1);  # keep track of the index of records used to make up the game
 $min_index = 0; 
 for( $i=1; $i<= $page_n; $i++ )
 {
-
   /*
     Number of records left in the database: $num_newlines - $min_index
     Number of records still need to pick: ($page_n - $i+1)
@@ -86,7 +87,7 @@ for( $i=1; $i<= $page_n; $i++ )
   {
      $max_index = $num_newlines -1 ;
   }
-  $j=rand($min_index,$max_index);
+  $j = rand($min_index, $max_index);
   $index_arr[$i-1] = $j;
   $min_index = $j+1;
   $line = $lines_arr[$j];
@@ -95,6 +96,7 @@ for( $i=1; $i<= $page_n; $i++ )
   $name=$tokens[1];
   $count_list = $count_list.$j.",";
   $file_list = $file_list.$file.",";
+}
 
 ?>
 
@@ -118,8 +120,9 @@ for( $i=1; $i<= $page_n; $i++ )
                    </tr>
                  </table>
               </div>
-              </div>
-              <script type="text/javascript">
+            </div>
+            <script type="text/javascript">
+
 // TO-do: combine the common code in the following two functions
 // response is to keep track user's answers
 
@@ -206,7 +209,6 @@ for( $i=1; $i<= $page_n; $i++ )
 ?>
 
 <div id="result" data-role="page">
-
 </div><!-- /page -->
 
 <script>
